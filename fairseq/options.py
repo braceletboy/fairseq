@@ -2,6 +2,15 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+'''
+@file: options.py
+
+[FILENOTDONE] This file as the name suggests, is for defining and then
+configuring the command line options/flags provided by the fairseq module.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
 
 import argparse
 import sys
@@ -19,12 +28,54 @@ def get_preprocessing_parser(default_task="translation"):
     return parser
 
 
+'''
+FUNCTION: get_training_parser()
+
+ARGUMENTS:
+    default_task: The default task to use for the --task flag
+
+[DONE] This function creates and returns the parser required for training.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def get_training_parser(default_task="translation"):
+    '''
+    [GOTO get_parser() IN fairseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser = get_parser("Trainer", default_task)
+    '''
+    [GOTO add_dataset_args() IN fariseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     add_dataset_args(parser, train=True)
+    '''
+    [GOTO add_distributed_training_args() IN fariseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     add_distributed_training_args(parser)
+    '''
+    [GOTO add_model_args() IN fairseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     add_model_args(parser)
+    '''
+    [GOTO add_optimization_args() IN fairseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     add_optimization_args(parser)
+    '''
+    [GOTO add_checkpoint_args() IN fariseq/options.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     add_checkpoint_args(parser)
     return parser
 
@@ -119,8 +170,10 @@ def parse_args_and_arch(
             parse_known=parse_known,
             suppress_defaults=False,
         )
-        suppressed_parser = argparse.ArgumentParser(add_help=False, parents=[parser])
-        suppressed_parser.set_defaults(**{k: None for k, v in vars(args).items()})
+        suppressed_parser = argparse.ArgumentParser(
+            add_help=False, parents=[parser])
+        suppressed_parser.set_defaults(
+            **{k: None for k, v in vars(args).items()})
         args = suppressed_parser.parse_args(input_args)
         return argparse.Namespace(
             **{k: v for k, v in vars(args).items() if v is not None}
@@ -216,29 +269,74 @@ def parse_args_and_arch(
         return args
 
 
+'''
+FUNCTION: get_parser()
+
+ARGUMENTS:
+    desc: NOT USED.
+    default_task: The default task for the task registry argument.
+
+[DONE] The following function intiates the argsparse.ArgumentParser object for
+parsing arguments provided to a python script. It also defines the command line
+arguments common for various modules and also imports the user written modules.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def get_parser(desc, default_task="translation"):
     # Before creating the true parser, we need to import optional user module
     # in order to eagerly import custom tasks, optimizers, architectures, etc.
     usr_parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
     usr_parser.add_argument("--user-dir", default=None)
     usr_args, _ = usr_parser.parse_known_args()
+
+    '''
+    [GOTO import_user_module() IN fairseq/utils.py]
+    Import any user written custom modules like custom tasks, optimzers,
+    architectures etc. into this file. The custom modules are registered with
+    the fariseq architecture through decorators like @register_task,
+    @register_model etc.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     utils.import_user_module(usr_args)
 
     parser = argparse.ArgumentParser(allow_abbrev=False)
     # fmt: off
-    parser.add_argument('--no-progress-bar', action='store_true', help='disable progress bar')
+    parser.add_argument('--no-progress-bar',
+                        action='store_true', help='disable progress bar')
     parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                         help='log progress every N batches (when progress bar is disabled)')
     parser.add_argument('--log-format', default=None, help='log format to use',
                         choices=['json', 'none', 'simple', 'tqdm'])
+    '''
+    QUESTION: Why should --tensorboard-logdir match --logdir?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument('--tensorboard-logdir', metavar='DIR', default='',
                         help='path to save logs for tensorboard, should match --logdir '
                              'of running tensorboard (default: no tensorboard logging)')
     parser.add_argument('--seed', default=None, type=int, metavar='N',
                         help='pseudo random number generator seed')
-    parser.add_argument('--cpu', action='store_true', help='use CPU instead of CUDA')
-    parser.add_argument('--tpu', action='store_true', help='use TPU instead of CUDA')
-    parser.add_argument('--bf16', action='store_true', help='use bfloat16; implies --tpu')
+    parser.add_argument('--cpu', action='store_true',
+                        help='use CPU instead of CUDA')
+
+    '''
+    QUESTION: Are these tpu, bf16, fp16, memory-efficient-bf16,
+    memory-efficient-fp16, fp16-no-flatten-grad, fp16-init-scale,
+    fp16-scale-window, fp16-scale-tolerance, min-loss-scale,
+    threshold-loss-scale, user-dir, empty-cache-freq, all-gather-list-size,
+    model-parallel-size, checkpoint-suffix, quantization-config-path, profile
+    options relevant to us?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
+    parser.add_argument('--tpu', action='store_true',
+                        help='use TPU instead of CUDA')
+    parser.add_argument('--bf16', action='store_true',
+                        help='use bfloat16; implies --tpu')
     parser.add_argument('--fp16', action='store_true', help='use FP16')
     parser.add_argument('--memory-efficient-bf16', action='store_true',
                         help='use a memory-efficient version of BF16 training; implies --bf16')
@@ -269,8 +367,23 @@ def get_parser(desc, default_task="translation"):
                         help='suffix to add to the checkpoint file name')
     parser.add_argument('--quantization-config-path', default=None,
                         help='path to quantization config file')
-    parser.add_argument('--profile', action='store_true', help='enable autograd profiler emit_nvtx')
+    parser.add_argument('--profile', action='store_true',
+                        help='enable autograd profiler emit_nvtx')
 
+    '''
+    [GOTO fariseq/registry.py]
+    REGISTRIES contains all the registers maintained. The for loop below adds
+    the names of names of each register (register_name) as the argument name
+    and the default specified while setting up the registry [GOTO
+    setup_registry IN fairseq/registry.py] as the default for the argument. The
+    choices argument is list of names all the objects registered under that
+    particular registry.
+
+    QUESTION: I donot think these registries are required for us but I need to
+    be sure about this. So, are these surely unimportant?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     from fairseq.registry import REGISTRIES
     for registry_name, REGISTRY in REGISTRIES.items():
         parser.add_argument(
@@ -279,6 +392,16 @@ def get_parser(desc, default_task="translation"):
             choices=REGISTRY['registry'].keys(),
         )
 
+    '''
+    [GOTO fariseq/tasks/__init__.py]
+    Similar to what happens above. The only differnce seems that TASK_REGISTRY
+    seems to be not included in the REGISTRIES variable above.
+
+    QUESTION: I donot think this registry is required for us but I need to be
+    sure about this. So, is this surely unimportant?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Task definitions can be found under fairseq/tasks/
     from fairseq.tasks import TASK_REGISTRY
     parser.add_argument('--task', metavar='TASK', default=default_task,
@@ -334,11 +457,41 @@ def add_preprocess_args(parser):
     return parser
 
 
+'''
+FUNCTION: add_dataset_args()
+
+ARGUMENTS:
+    parser: The ArgumentParser object being used to parse command line
+    arguments.
+    train: Whether training is being done or not
+    gen: Whether generation is being done or not
+
+[DONE] This function adds the arguments required for handling datasets.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def add_dataset_args(parser, train=False, gen=False):
+    '''
+    By default, ArgumentParser goups command line arguments as 'positional' or
+    'optional' when displaying help messages. If there is a more intelligent
+    grouping, one can use the add_argument_group() function.
+    Refer: https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_argument_group
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group = parser.add_argument_group("Dataset and data loading")
     # fmt: off
     group.add_argument('--num-workers', default=1, type=int, metavar='N',
                        help='how many subprocesses to use for data loading')
+
+    '''
+    QUESTION: Are the flags skip-invalid-size-inputs-valid-test, max-tokens,
+    max-sentences, required-batch-size-multiple, dataset-impl
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--skip-invalid-size-inputs-valid-test', action='store_true',
                        help='ignore too long or too short lines in valid and test set')
     group.add_argument('--max-tokens', type=int, metavar='N',
@@ -348,11 +501,19 @@ def add_dataset_args(parser, train=False, gen=False):
     group.add_argument('--required-batch-size-multiple', default=8, type=int, metavar='N',
                        help='batch size will either be less than this value, '
                             'or a multiple of this value')
+
+    '''
+    [GOTO get_available_dataset_impl() IN fairseq/data/indexed_dataset.py]
+    QUESTION: Is this flag relevant to us? Anvesh talked about data formats.
+    Need to ask him more about it.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument('--dataset-impl', metavar='FORMAT',
                         choices=get_available_dataset_impl(),
                         help='output dataset implementation')
     group.add_argument('--data-buffer-size', default=10, type=int, metavar='N',
-                        help='number of batches to preload')
+                       help='number of batches to preload')
     if train:
         group.add_argument('--train-subset', default='train', metavar='SPLIT',
                            help='data subset to use for training (e.g. train, valid, test)')
@@ -369,14 +530,32 @@ def add_dataset_args(parser, train=False, gen=False):
                            help='specified random seed for validation')
         group.add_argument('--disable-validation', action='store_true',
                            help='disable validation')
+        '''
+        QUESTION: Do we need max-tokens-valid, max-sentences-valid flags?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         group.add_argument('--max-tokens-valid', type=int, metavar='N',
-                           help='maximum number of tokens in a validation batch'
+                           help='maximum number of tokens in a validation batch'  # noqa: E501
                                 ' (defaults to --max-tokens)')
         group.add_argument('--max-sentences-valid', type=int, metavar='N',
                            help='maximum number of sentences in a validation batch'
                                 ' (defaults to --max-sentences)')
+        '''
+        I think the following flag is for curriculum learning.
+
+        QUESTION: Do we need curriculum flag?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         group.add_argument('--curriculum', default=0, type=int, metavar='N',
                            help='don\'t shuffle batches for first N epochs')
+
+    '''
+    QUESTION: Do we need generation flags?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     if gen:
         group.add_argument('--gen-subset', default='test', metavar='SPLIT',
                            help='data subset to generate (train, valid, test)')
@@ -386,6 +565,18 @@ def add_dataset_args(parser, train=False, gen=False):
                            help='id of the shard to generate (id < num_shards)')
     # fmt: on
     return group
+
+
+'''
+FUNCTION: add_distributed_training_args()
+
+QUESTION: Are we going to use distributed training? (I don't think so, but
+need to confirm.)
+
+[NOTDONE]
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 
 def add_distributed_training_args(parser, default_world_size=None):
@@ -430,7 +621,7 @@ def add_distributed_training_args(parser, default_world_size=None):
                        help='[deprecated] this is now defined per Criterion')
     group.add_argument('--broadcast-buffers', default=False, action='store_true',
                        help='Copy non-trainable parameters between GPUs, such as '
-                      'batchnorm population statistics')
+                       'batchnorm population statistics')
 
     group.add_argument('--distributed-wrapper', default='DDP', type=str,
                        choices=['DDP', 'SlowMo'],
@@ -456,33 +647,84 @@ def add_distributed_training_args(parser, default_world_size=None):
     return group
 
 
+'''
+FUNCTION: add_optimization_args()
+
+ARGUMENTS:
+    parser: The ArgumentParser object being used for parsing command line
+    arguments.
+
+[DONE] This function add the general flags related to optimization to parser.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def add_optimization_args(parser):
     group = parser.add_argument_group("Optimization")
     # fmt: off
+    '''
+    QUESTION: What happens when the flags --max-epoch and --max-update are left
+    to be their default value 0?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--max-epoch', '--me', default=0, type=int, metavar='N',
                        help='force stop training at specified epoch')
     group.add_argument('--max-update', '--mu', default=0, type=int, metavar='N',
                        help='force stop training at specified update')
     group.add_argument('--stop-time-hours', default=0, type=float, metavar='N',
                        help='force stop training after specified cumulative time (if >0)')
+    '''
+    QUESTION: Do we need the flags --clip-norm and --sentence-avg?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--clip-norm', default=0.0, type=float, metavar='NORM',
                        help='clip threshold of gradients')
     group.add_argument('--sentence-avg', action='store_true',
                        help='normalize gradients by the number of sentences in a batch'
                             ' (default is to normalize by number of tokens)')
+    '''
+    QUESTION: What happens when we go beyond the K'th epoch?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--update-freq', default='1', metavar='N1,N2,...,N_K',
                        type=lambda uf: eval_str_list(uf, type=int),
                        help='update parameters every N_i batches, when in epoch i')
+    '''
+    QUESTION: What does the 'note' in the following flag's help mean?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--lr', '--learning-rate', default='0.25', type=eval_str_list,
                        metavar='LR_1,LR_2,...,LR_N',
                        help='learning rate for the first N epochs; all epochs >N using LR_N'
                             ' (note: this may be interpreted differently depending on --lr-scheduler)')
     group.add_argument('--min-lr', default=-1, type=float, metavar='LR',
                        help='stop training when the learning rate reaches this minimum')
+    '''
+    QUESTION: Do we need the --use-bmuf flag?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--use-bmuf', default=False, action='store_true',
                        help='specify global optimizer for syncing models on different GPUs/shards')
     # fmt: on
     return group
+
+
+'''
+FUNCTION: add_checkpoint_args()
+
+ARGUMENTS:
+    parser: The ArgumentParser object used for parsing command line arguments
+
+[DONE] This function adds the checkpointing flags to the parser.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 
 def add_checkpoint_args(parser):
@@ -490,9 +732,19 @@ def add_checkpoint_args(parser):
     # fmt: off
     group.add_argument('--save-dir', metavar='DIR', default='checkpoints',
                        help='path to save checkpoints')
+    '''
+    QUESTION: Will this --restore-file be always checked in the <save-dir>?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--restore-file', default='checkpoint_last.pt',
                        help='filename from which to load checkpoint '
                             '(default: <save-dir>/checkpoint_last.pt')
+    '''
+    QUESTION: What does 'meters and lr scheduler will be reset' mean?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--finetune-from-model', default=None, type=str,
                        help='finetune from a pretrained model; '
                             'note that meters and lr scheduler will be reset')
@@ -528,6 +780,11 @@ def add_checkpoint_args(parser):
                        help='metric to use for saving "best" checkpoints')
     group.add_argument('--maximize-best-checkpoint-metric', action='store_true',
                        help='select the largest metric value for saving "best" checkpoints')
+    '''
+    QUESTION: How is --patience influenced by --validate-interval?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--patience', type=int, default=-1, metavar='N',
                        help=('early stop training if valid performance doesn\'t '
                              'improve for N consecutive validation runs; note '
@@ -647,7 +904,8 @@ def add_generation_args(parser):
                             'if not set, then dropout will be retained for all modules')
 
     # special decoding format for advanced decoding.
-    group.add_argument('--decoding-format', default=None, type=str, choices=['unigram', 'ensemble', 'vote', 'dp', 'bs'])
+    group.add_argument('--decoding-format', default=None, type=str,
+                       choices=['unigram', 'ensemble', 'vote', 'dp', 'bs'])
     # fmt: on
     return group
 
@@ -662,6 +920,19 @@ def add_interactive_args(parser):
     # fmt: on
 
 
+'''
+FUNCTION: add_model_args()
+
+ARGUMENTS:
+    parser: The ArgumentParser object being used for parsing command line
+    arguments.
+
+[DONE] This function add general model related flags to the parser.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def add_model_args(parser):
     group = parser.add_argument_group("Model configuration")
     # fmt: off
@@ -673,6 +944,11 @@ def add_model_args(parser):
     # 1) model defaults (lowest priority)
     # 2) --arch argument
     # 3) --encoder/decoder-* arguments (highest priority)
+    '''
+    [GOTO ARCH_MODEL_REGISTRY IN fariseq/models/__init__.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     from fairseq.models import ARCH_MODEL_REGISTRY
     group.add_argument('--arch', '-a', metavar='ARCH',
                        choices=ARCH_MODEL_REGISTRY.keys(),
