@@ -4,6 +4,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+'''
+@file: setup.py
+
+[FILEDONE] This file is part of packaging the fairseq library as a python
+package using setuptools.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 import os
 from setuptools import setup, find_packages, Extension
 import sys
@@ -112,7 +122,8 @@ if 'clean' in sys.argv[1:]:
     # Source: https://bit.ly/2NLVsgE
     print("deleting Cython files...")
     import subprocess
-    subprocess.run(['rm -f fairseq/*.so fairseq/**/*.so fairseq/*.pyd fairseq/**/*.pyd'], shell=True)
+    subprocess.run(
+        ['rm -f fairseq/*.so fairseq/**/*.so fairseq/*.pyd fairseq/**/*.pyd'], shell=True)
 
 
 setup(

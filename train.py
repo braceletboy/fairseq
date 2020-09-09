@@ -3,8 +3,14 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+
 """
-Legacy entry point. Use fairseq_cli/train.py or fairseq-train instead.
+@file: train.py
+
+[FILEDONE] This file is a legacy entry point to the code. Use
+fairseq_cli/train.py or fairseq-train instead. [GOTO faiseq_cli/train.py]
+
+@readby: rukmangadh.sai@nobroker.in
 """
 
 from fairseq_cli.train import cli_main

@@ -3,6 +3,20 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+'''
+@file: hubconf.py
+
+[FILEDONE] Torch Hub is a pre-trained model repository maintained by pytorch.
+You can write a hubconf.py file in the github repository that contains the
+model being developed and publish your model at [https://pytorch.org/hub/]
+
+Refer to [https://pytorch.org/docs/stable/hub.html] for learning why this file
+is written this way.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 import functools
 
 from fairseq.hub_utils import BPEHubInterface as bpe  # noqa
@@ -17,6 +31,14 @@ dependencies = [
     'torch',
 ]
 
+
+'''
+I think the torch.hub module executes the whole of hubconf.py as a script. So,
+the following code gets exected and the cython components in the repository get
+built before making the models available through torch.hub.list()
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 # torch.hub doesn't build Cython components, so if they are not found then try
 # to build them here
@@ -37,6 +59,15 @@ except (ImportError, ModuleNotFoundError):
             'installed if the torch.hub model you are loading depends on it.'
         )
 
+
+'''
+The following just adds the elements in MODEL_REGISTRY to the global variables
+dictionary, maintained by python for this script. I think this is another way,
+apart from the ways described at [https://pytorch.org/docs/stable/hub.html], to
+expose the functions so that torch.hub.list() can show them when queried.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 for _model_type, _cls in MODEL_REGISTRY.items():
     for model_name in _cls.hub_models().keys():
