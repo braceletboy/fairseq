@@ -385,6 +385,19 @@ def resolve_max_positions(*args):
     return max_positions
 
 
+'''
+FUNCTION: import_user_module()
+
+ARGUMENTS:
+    args: The command line arguments passed by the user.
+
+[DONE] This function adds the paths of user written modules like custom tasks,
+optimizers, architectures etc. to sys.path and also imports these modules.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def import_user_module(args):
     module_path = getattr(args, "user_dir", None)
     if module_path is not None:
