@@ -24,8 +24,25 @@ from fairseq.models import (
 )
 from fairseq.modules import LayerNorm, PositionalEmbedding, TransformerDecoderLayer
 
+'''
+FUNCTION: add_common_args()
+
+ARGUMENTS:
+    parser: The ArgumentParser object for parsing command line arguments
+
+[DONE] This function defines the common arguments required by the modules in
+this file.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
 
 def add_common_args(parser):
+    '''
+    QUESTION: What is the use of this flag?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument("--w2v-path", help="path to wav2vec 2.0 model")
     parser.add_argument(
         "--no-pretrained-weights",
@@ -94,16 +111,31 @@ def add_common_args(parser):
         help="whether to allow masks to overlap",
     )
 
+    '''
+    QUESTION: How is this flag different from --mask-length?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument(
         "--mask-channel-length", type=int, help="repeat the mask indices multiple times"
     )
 
+    '''
+    QUESTION: How is this flag different from --mask-prob?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument(
         "--mask-channel-prob",
         type=float,
         help="probability of replacing a token with mask",
     )
 
+    '''
+    QUESTION: How is this flag different from --mask-selection?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument(
         "--mask-channel-selection",
         type=str,
@@ -111,12 +143,22 @@ def add_common_args(parser):
         help="how to choose masks",
     )
 
+    '''
+    QUESTION: How is this flag different from --mask-other?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument(
         "--mask-channel-other",
         type=float,
         help="stdev of the mask length in case of 'normal' selection strategy",
     )
 
+    '''
+    QUESTION: How is this flag different from --no-mask-overlap?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser.add_argument(
         "--no-mask-channel-overlap",
         action="store_true",
