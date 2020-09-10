@@ -143,6 +143,25 @@ def eval_bool(x, default=False):
         return default
 
 
+'''
+FUNCTION: parse_args_and_arch()
+
+ARGUMENTS:
+    parser: The parser for parsing command line arguments
+    input_args:
+    parse_known: If True, doesn't raise error if unknown args are given
+    suppress_defaults:
+    modify_parser:
+
+[PARTIALLYDONE] This function add the module specific arguments at various
+steps and then finally parses them, it finally returns the parsed arguments
+(and the left over flags if we set parse_known to True). It also set's the
+architecture specific flags to the corresponding values at the end.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def parse_args_and_arch(
     parser: argparse.ArgumentParser,
     input_args: List[str] = None,
@@ -179,8 +198,20 @@ def parse_args_and_arch(
             **{k: v for k, v in vars(args).items() if v is not None}
         )
 
+    '''
+    [GOTO ARCH_MODEL_REGISTRY, ARCH_CONFIG_REGISTRY
+    IN fairseq/models/__init__.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     from fairseq.models import ARCH_MODEL_REGISTRY, ARCH_CONFIG_REGISTRY
 
+    '''
+    QUESTION: The following user module related steps are already executed in
+    the get_parser step, why is this being done again?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Before creating the true parser, we need to import optional user module
     # in order to eagerly import custom tasks, optimizers, architectures, etc.
     usr_parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
@@ -205,23 +236,57 @@ def parse_args_and_arch(
             # arguments or which have default values.
             argument_default=argparse.SUPPRESS,
         )
+        '''
+        [GOTO add_args() IN fariseq/models/wav2vec/wav2vec2_asr.py]
+        [  ''      ''       ''      ''      ''    /wav2vec2.py]
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         ARCH_MODEL_REGISTRY[args.arch].add_args(model_specific_group)
 
     # Add *-specific args to parser.
+    '''
+    [GOTO REGISTRIES IN fairseq/registry.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     from fairseq.registry import REGISTRIES
 
+    '''
+    Add the flags defined by the additional relevant modules in all the
+    registries
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     for registry_name, REGISTRY in REGISTRIES.items():
         choice = getattr(args, registry_name, None)
         if choice is not None:
             cls = REGISTRY["registry"][choice]
             if hasattr(cls, "add_args"):
                 cls.add_args(parser)
+    '''
+    Add the flags defined by the relevant task in the task registry.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     if hasattr(args, "task"):
         from fairseq.tasks import TASK_REGISTRY
 
         TASK_REGISTRY[args.task].add_args(parser)
+
+    '''
+    QUESTION: Do we need to use this?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     if getattr(args, "use_bmuf", False):
         # hack to support extra args for block distributed data parallelism
+        '''
+        [GOTO class FairseqBMUF() IN fairseq/optim/bmuf.py]
+        QUESTION: Should we be doing this?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         from fairseq.optim.bmuf import FairseqBMUF
 
         FairseqBMUF.add_args(parser)
@@ -259,8 +324,20 @@ def parse_args_and_arch(
     else:
         args.no_seed_provided = False
 
+    '''
+    [GOTO ARCH_CONFIG_REGISTRY IN fairseq/models/__init__.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Apply architecture configuration.
     if hasattr(args, "arch"):
+        '''
+        [GOTO base_architecture() IN fairseq/models/wav2vec/wav2vec2_asr.py]
+        The following step sets the wav2vecCtc specific flags to their
+        corresponding values.
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         ARCH_CONFIG_REGISTRY[args.arch](args)
 
     if parse_known:
@@ -569,9 +646,6 @@ def add_dataset_args(parser, train=False, gen=False):
 
 '''
 FUNCTION: add_distributed_training_args()
-
-QUESTION: Are we going to use distributed training? (I don't think so, but
-need to confirm.)
 
 [NOTDONE]
 
