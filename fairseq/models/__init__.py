@@ -3,6 +3,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+'''
+@file: __init__.py
+
+[DONE] This file contains the code for registering models and model
+architectures. Also, it loads all the python files in the models/ directory at
+the end.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
 import argparse
 import importlib
 import os
@@ -22,13 +32,66 @@ from .fairseq_model import (
 from .composite_encoder import CompositeEncoder
 from .distributed_fairseq_model import DistributedFairseqModel
 
+'''
+GLOBALVAR: MODEL_REGISTRY
 
+[DONE] Dictionary mapping a model name to it's corresponding pytorch class.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 MODEL_REGISTRY = {}
+
+'''
+GLOBALVAR: ARCH_MODEL_REGISTRY
+
+[DONE] Dictionary mapping architecture name to it's corresponding model class.
+
+In pytorch we have two concepts - 'model type/model' and 'model architecture'.
+We can have different model architectures for the same model. We have already
+talked about each module in this fairseq repository having it's own set of
+arguments which are specified in it's add_args() method. So, a particular model
+architecture corresponds to a particular state of the arguments in the
+add_args() functions of that model/model type. One can pre-define these
+configurations inside a function and register this function with the decorator
+register_model_architecture(name). This dictionary here maintains the mappings
+from the names (architecture names) to the corresponding model class.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 ARCH_MODEL_REGISTRY = {}
+
+'''
+GLOBALVAR: ARCH_MODEL_INV_REGISTRY
+
+[DONE] See above readby comment before proceeding further. The following is a
+dicitionary mapping model names to list of architecture names. The list
+contains all architecture names that correspond to the model type specified by
+the model name.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 ARCH_MODEL_INV_REGISTRY = {}
+
+'''
+GLOBALVAR: ARCH_CONFIG_REGISTRY
+
+[DONE] See the readby comment for ARCH_MODEL_REGISTRY before proceeding
+further. The following is a dictionary mapping each architecture name to it's
+ccorresponding function object.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 ARCH_CONFIG_REGISTRY = {}
 
+'''
+[DONE] By default, when doing an `import module_name`, all objects except those
+whose names start with an underscore are imported. To override this default and
+specify which objects to export when an `import module_name` is done, one can
+use __all__. Only those objects whose names are present in __all__ will get
+imported.
 
+@readby: rukmangadh.sai@nobroker.in
+'''
 __all__ = [
     'BaseFairseqModel',
     'CompositeEncoder',
@@ -119,6 +182,11 @@ def register_model_architecture(model_name, arch_name):
     return register_model_arch_fn
 
 
+'''
+QUESTION: Why is the following code required?
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 # automatically import any Python files in the models/ directory
 models_dir = os.path.dirname(__file__)
 for file in os.listdir(models_dir):
@@ -131,6 +199,11 @@ for file in os.listdir(models_dir):
         model_name = file[:file.find('.py')] if file.endswith('.py') else file
         module = importlib.import_module('fairseq.models.' + model_name)
 
+        '''
+        QUESTION: What does the following code do?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         # extra `model_parser` for sphinx
         if model_name in MODEL_REGISTRY:
             parser = argparse.ArgumentParser(add_help=False)
