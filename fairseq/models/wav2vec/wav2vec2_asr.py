@@ -3,6 +3,14 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+'''
+@file: wav2vec2_asr.py
+
+[FILENOTDONE]
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
 import contextlib
 import copy
 import math
@@ -667,6 +675,24 @@ def Linear(in_features, out_features, bias=True):
     if bias:
         nn.init.constant_(m.bias, 0.0)
     return m
+
+
+'''
+FUNCTION: base_architecture()
+
+ARGUMENTS:
+    args: These are the arguments obtained from an ArgumentParser object after
+    parsing the command line arguments provided.
+
+This function is not the base class for all model architectures - don't be
+confused by the naming.
+[GOTO ARCH_MODEL_REGISTRY in fairseq/models/__init__.py] for more information.
+
+[DONE] The following function sets the flags specific to Wav2VecCtc class to
+certain base(default) values.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 
 @register_model_architecture("wav2vec_ctc", "wav2vec_ctc")
