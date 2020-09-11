@@ -12,8 +12,25 @@ from .fairseq_task import FairseqTask
 TASK_REGISTRY = {}
 TASK_CLASS_NAMES = set()
 
+'''
+FUNCTION: setup_task()
+
+ARGUMENTS:
+    args: The parsed command line arguments
+
+This function just initializes the task instance.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
 
 def setup_task(args, **kwargs):
+    '''
+    [GOTO class AudioPretrainingTask.setup_task() IN
+    fariseq/tasks/audio_pretraining.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     return TASK_REGISTRY[args.task].setup_task(args, **kwargs)
 
 
@@ -51,6 +68,19 @@ def register_task(name):
         return cls
 
     return register_task_cls
+
+
+'''
+FUNCTION: get_task()
+
+ARGUMENTS:
+    name: The name of the task.
+
+This function just returns the task class object (not an instance of the class
+but the class itself).
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 
 def get_task(name):
