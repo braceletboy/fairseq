@@ -491,6 +491,18 @@ def has_parameters(module):
         return False
 
 
+'''
+FUNCTION: set_torch_seed()
+
+ARGUMENTS:
+    seed: The seed value
+
+Set the seed for generating random numbers.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def set_torch_seed(seed):
     # Set seed based on args.seed and the update number so that we get
     # reproducible results when resuming from checkpoints
