@@ -154,6 +154,19 @@ def distributed_main(i, main, args, kwargs):
     main(args, **kwargs)
 
 
+'''
+FUNCTION: call_main()
+
+ARGUMENTS:
+    args: The arguments got from parsing commandline arguments
+
+[PARTIALLYDONE] If distributed training is not being followed, then this
+function jut executes the 'main' function [GOTO main() IN fairseq/train.py].
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def call_main(args, main, **kwargs):
     if args.distributed_init_method is None:
         infer_init_method(args)
