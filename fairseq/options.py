@@ -474,9 +474,6 @@ def get_parser(desc, default_task="translation"):
     Similar to what happens above. The only differnce seems that TASK_REGISTRY
     seems to be not included in the REGISTRIES variable above.
 
-    QUESTION: I donot think this registry is required for us but I need to be
-    sure about this. So, is this surely unimportant?
-
     @readby: rukmangadh.sai@nobroker.in
     '''
     # Task definitions can be found under fairseq/tasks/
@@ -562,10 +559,9 @@ def add_dataset_args(parser, train=False, gen=False):
     # fmt: off
     group.add_argument('--num-workers', default=1, type=int, metavar='N',
                        help='how many subprocesses to use for data loading')
-
     '''
     QUESTION: Are the flags skip-invalid-size-inputs-valid-test, max-tokens,
-    max-sentences, required-batch-size-multiple, dataset-impl
+    , dataset-impl important to us?
 
     @readby: rukmangadh.sai@nobroker.in
     '''
@@ -575,14 +571,17 @@ def add_dataset_args(parser, train=False, gen=False):
                        help='maximum number of tokens in a batch')
     group.add_argument('--max-sentences', '--batch-size', type=int, metavar='N',
                        help='maximum number of sentences in a batch')
+    '''
+    QUESTION: Is the flag required-batch-size-multiple important to us?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     group.add_argument('--required-batch-size-multiple', default=8, type=int, metavar='N',
                        help='batch size will either be less than this value, '
                             'or a multiple of this value')
-
     '''
     [GOTO get_available_dataset_impl() IN fairseq/data/indexed_dataset.py]
-    QUESTION: Is this flag relevant to us? Anvesh talked about data formats.
-    Need to ask him more about it.
+    QUESTION: Is this flag relevant to us?
 
     @readby: rukmangadh.sai@nobroker.in
     '''
