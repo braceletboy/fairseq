@@ -3,9 +3,17 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+'''
+@file: fairseq_cli/train.py
+
+[FILENOTDONE]
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 """
 Train a new model on one or across multiple GPUs.
 """
+
 
 import argparse
 import logging
@@ -30,43 +38,121 @@ from fairseq.model_parallel.megatron_trainer import MegatronTrainer
 from fairseq.trainer import Trainer
 
 
+'''
+Does the basic configuration of the logging system.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
     stream=sys.stdout,
 )
+'''
+Instantiates the logger for training.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 logger = logging.getLogger("fairseq_cli.train")
 
 
+'''
+
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def main(args):
+    '''
+    [GOTO import_user_module() IN fairseq/utils.py]
+    QUESTION: Why is this being done again?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     utils.import_user_module(args)
 
+    '''
+    QUESTION: Need to find out if max_tokens is relevant to us.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     assert (
         args.max_tokens is not None or args.max_sentences is not None
     ), "Must specify batch size either with --max-tokens or --max-sentences"
+    '''
+    [GOTO reset() IN fairseq/logging/metrics.py]
+    INCOMPLETE
 
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     metrics.reset()
 
     np.random.seed(args.seed)
+    '''
+    [GOTO set_torch_seed() IN fairseq/utils.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     utils.set_torch_seed(args.seed)
 
+    '''
+    DISTRIBUTED - INCOMPLETE
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     if distributed_utils.is_master(args):
         checkpoint_utils.verify_checkpoint_directory(args.save_dir)
 
+    '''
+    [GOTO logger in fairseq/train.py]
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Print args
     logger.info(args)
 
+    '''
+    [GOTO setup_task() IN fairseq/tasks/__init__.py]
+    TODO: write __init__() function in AudioPretrainingTask class.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Setup task, e.g., translation, language modeling, etc.
     task = tasks.setup_task(args)
 
+    '''
+    [GOTO class AudioPretrainingTask.load_dataset() IN
+    fairseq/tasks/audio_pretraining.py]
+    TODO: write load_dataset() function in AudioPretrainingTask class.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     # Load valid dataset (we load training data below, based on the latest checkpoint)
     for valid_sub_split in args.valid_subset.split(","):
         task.load_dataset(valid_sub_split, combine=False, epoch=1)
 
     # Build model and criterion
+    '''
+    [GOTO FairseqTask.build_model() IN fairseq/tasks/]
+    TODO: write build_model() function in Wav2Vec2Task class.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     model = task.build_model(args)
+    '''
+    [GOTO FairseqTask.build_criterion() IN fairseq/tasks/]
+    TODO: write build_criterion() function in Wav2Vec2Task class.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     criterion = task.build_criterion(args)
+    '''
+    QUESTION: Need to understand how this logging is happening
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     logger.info(model)
     logger.info("task: {} ({})".format(args.task, task.__class__.__name__))
     logger.info("model: {} ({})".format(args.arch, model.__class__.__name__))
@@ -332,15 +418,58 @@ def get_valid_stats(args, trainer, stats):
     return stats
 
 
+'''
+FUNCTION: cli_main()
+
+ARGUMENTS:
+    modify_parser:
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def cli_main(modify_parser=None):
+    '''
+    [GOTO get_training_parser(), parse_args_and_arch() IN fairseq/options.py]
+
+    This step returns the training parser object after populating the parser
+    with all the flags relevant for training.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     parser = options.get_training_parser()
+    '''
+    [GOTO parse_args_and_arch() IN fairseq/options.py]
+
+    This step parses the arguments and sets the model specific flags to those
+    values specified by the architecture.
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     args = options.parse_args_and_arch(parser, modify_parser=modify_parser)
+    '''
+    QUESTION: Will we need the profiler?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     if args.profile:
         with torch.cuda.profiler.profile():
             with torch.autograd.profiler.emit_nvtx():
                 distributed_utils.call_main(args, main)
     else:
+        '''
+        [GOTO call_main() in fairseq/distributed_utils.py]
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         distributed_utils.call_main(args, main)
+
+
+'''
+[GOTO cli_main() IN fairseq_cli/train.py]
+
+@readby: rukmangadh.sai@nobroker.in
+'''
 
 
 if __name__ == "__main__":
