@@ -89,6 +89,11 @@ class GumbelVectorQuantizer(nn.Module):
 
             p = [range(self.num_vars)] * self.groups
             inds = list(product(*p))
+            '''
+            QUESTION: Why are we flattening?
+
+            @readby: rukmangadh.sai@nobroker.in
+            '''
             self.codebook_indices = torch.tensor(
                 inds, dtype=torch.long, device=self.vars.device
             ).flatten()
@@ -99,6 +104,11 @@ class GumbelVectorQuantizer(nn.Module):
                 )
                 for b in range(1, self.groups):
                     self.codebook_indices[:, b] += self.num_vars * b
+                '''
+                QUESTION: Why are we flattening?
+
+                @readby: rukmangadh.sai@nobroker.in
+                '''
                 self.codebook_indices = self.codebook_indices.flatten()
         return self.codebook_indices
 
@@ -153,6 +163,12 @@ class GumbelVectorQuantizer(nn.Module):
             .view(bsz * tsz, self.groups, -1)
         )
         hard_probs = torch.mean(hard_x.float(), dim=0)
+
+        '''
+        QUESTION: What is this code perplexity for?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         result["code_perplexity"] = torch.exp(
             -torch.sum(hard_probs * torch.log(hard_probs + 1e-7), dim=-1)
         ).sum()
@@ -160,6 +176,11 @@ class GumbelVectorQuantizer(nn.Module):
         avg_probs = torch.softmax(
             x.view(bsz * tsz, self.groups, -1).float(), dim=-1
         ).mean(dim=0)
+        '''
+        QUESTION: What is this prob perplexity for?
+
+        @readby: rukmangadh.sai@nobroker.in
+        '''
         result["prob_perplexity"] = torch.exp(
             -torch.sum(avg_probs * torch.log(avg_probs + 1e-7), dim=-1)
         ).sum()
