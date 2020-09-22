@@ -120,6 +120,17 @@ def save_checkpoint(args, trainer, epoch_itr, val_loss):
                 os.remove(old_chk)
 
 
+'''
+FUNCTION: load_checkpoint
+
+ARGUMENTS:
+    args: The command line arguments
+    trainer: The trainer object that acts as a helper while training.
+
+@readby: rukmangadh.sai@nobroker.in
+'''
+
+
 def load_checkpoint(args, trainer, **passthrough_args):
     """
     Load a checkpoint and restore the training iterator.
@@ -130,6 +141,11 @@ def load_checkpoint(args, trainer, **passthrough_args):
     reset_optimizer = args.reset_optimizer
     reset_lr_scheduler = args.reset_lr_scheduler
     optimizer_overrides = eval(args.optimizer_overrides)
+    '''
+    [QUESTION]: Do we need the reset_meters option?
+
+    @readby: rukmangadh.sai@nobroker.in
+    '''
     reset_meters = args.reset_meters
     reset_dataloader = args.reset_dataloader
 
